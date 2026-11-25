@@ -96,13 +96,14 @@
         <h3 class="fw-bold text-center mb-4">Proje Güncelle</h3>
 
         <form asp-action="Edit" method="post">
+            <div asp-validation-summary="All" class="text-warning small mb-3"></div>
             <input type="hidden" name="ProjectId" value="@Model.ProjectId" />
             <input type="hidden" name="CustomerId" value="@Model.CustomerId" />
 
             <div class="row mb-3">
                 <div class="col-md-6">
                     <label class="form-label text-uppercase">PROJE ADI</label>
-                    <input type="text" name="ProjectName" class="form-control" value="@Model.ProjectName" required />
+                    <input type="text" name="ProjectName" class="form-control" value="@Model.ProjectName" required maxlength="150" />
                 </div>
                 <div class="col-md-6">
                     <label class="form-label text-uppercase">GÜNCEL DURUM</label>
@@ -120,7 +121,7 @@
 
             <div class="mb-3">
                 <label class="form-label text-uppercase">AÇIKLAMA</label>
-                <textarea name="Description" class="form-control" rows="2">@Model.Description</textarea>
+                <textarea name="Description" class="form-control" rows="2" maxlength="2000">@Model.Description</textarea>
             </div>
 
             <div class="row mb-4">

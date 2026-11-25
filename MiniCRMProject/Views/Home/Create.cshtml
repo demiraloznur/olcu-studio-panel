@@ -79,11 +79,12 @@
         <h3 class="fw-bold text-center mb-4">Yeni Proje Kaydı</h3>
 
         <form asp-action="Create" method="post">
+            <div asp-validation-summary="All" class="text-warning small mb-3"></div>
 
             <div class="row mb-3">
                 <div class="col-md-6">
                     <label class="form-label text-uppercase">PROJE ADI</label>
-                    <input type="text" name="ProjectName" class="form-control" placeholder="Projenin ismini girin..." required />
+                    <input type="text" name="ProjectName" value="@Model?.ProjectName" class="form-control" placeholder="Projenin ismini girin..." required maxlength="150" />
                 </div>
                 <div class="col-md-6">
                     <label class="form-label text-uppercase">MÜŞTERİ SEÇİMİ</label>
@@ -99,7 +100,7 @@
 
             <div class="mb-3">
                 <label class="form-label text-uppercase">AÇIKLAMA</label>
-                <textarea name="Description" class="form-control" rows="2" placeholder="Proje detaylarını yazın..."></textarea>
+                <textarea name="Description" class="form-control" rows="2" maxlength="2000" placeholder="Proje detaylarını yazın...">@Model?.Description</textarea>
             </div>
 
             <div class="row mb-4">

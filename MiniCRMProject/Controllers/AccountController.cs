@@ -24,11 +24,22 @@ namespace MiniCRMProject.Controllers
         }
 
         [HttpPost]
-        public IActionResult Register(UserModel user, string password)
+        public IActionResult Register(RegisterViewModel model)
         {
-            user.PasswordHash = passwords.Hash(password);
-            user.Role = "Customer";
-            users.Add(user);
+            if (ModelState.IsValid && users.EmailExists(model.Email))
+            {
+                ModelState.AddModelError(nameof(model.Email), "Bu e-posta ile zaten bir hesap var.");
+            }
+            if (!ModelState.IsValid) return View(model);
+
+            users.Add(new UserModel
+            {
+                FirstName = model.FirstName.Trim(),
+                LastName = model.LastName.Trim(),
+                Email = model.Email.Trim(),
+                PasswordHash = passwords.Hash(model.Password),
+                Role = SessionUser.CustomerRole
+            });
             return RedirectToAction("Login");
         }
 
@@ -39,11 +50,11 @@ namespace MiniCRMProject.Controllers
         }
 
         [HttpPost]
-        public IActionResult Login(string email, string password)
+        public IActionResult Login(string? email, string? password)
         {
-            UserModel? user = users.GetByEmail(email);
+            UserModel? user = string.IsNullOrWhiteSpace(email) ? null : users.GetByEmail(email.Trim());
 
-            if (user != null && passwords.Verify(user.PasswordHash, password))
+            if (user != null && passwords.Verify(user.PasswordHash, password ?? ""))
             {
                 new SessionUser(user.UserId, user.FirstName + " " + user.LastName, user.Role)
                     .WriteTo(HttpContext.Session);

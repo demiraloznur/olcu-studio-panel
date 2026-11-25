@@ -20,6 +20,15 @@ namespace MiniCRMProject.Data
             return (int)command.ExecuteScalar() == 1;
         }
 
+        public bool EmailExists(string email)
+        {
+            using SqlConnection connection = db.Create();
+            SqlCommand command = new SqlCommand("SELECT COUNT(*) FROM Users WHERE Email = @email", connection);
+            command.Parameters.AddWithValue("@email", email.Trim());
+            connection.Open();
+            return (int)command.ExecuteScalar() > 0;
+        }
+
         public UserModel? GetByEmail(string email)
         {
             using SqlConnection connection = db.Create();

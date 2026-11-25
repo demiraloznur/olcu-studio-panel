@@ -41,6 +41,12 @@ namespace MiniCRMProject.Controllers
         [RequireAdmin]
         public IActionResult Create(ProjectModel projectModel)
         {
+            if (!ModelState.IsValid)
+            {
+                ViewBag.Customers = users.GetCustomers();
+                return View(projectModel);
+            }
+
             try
             {
                 projects.Add(projectModel);
@@ -69,6 +75,12 @@ namespace MiniCRMProject.Controllers
         [RequireAdmin]
         public IActionResult Edit(ProjectModel projectModel)
         {
+            if (!ModelState.IsValid)
+            {
+                ViewBag.UserRole = SessionUser.AdminRole;
+                return View(projectModel);
+            }
+
             try
             {
                 projects.Update(projectModel);

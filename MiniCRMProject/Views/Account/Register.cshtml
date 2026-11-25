@@ -1,4 +1,5 @@
-﻿@{
+﻿@model RegisterViewModel
+@{
     Layout = null;
 }
 
@@ -106,24 +107,25 @@
                 <div class="glass-form">
                     <h2 class="fw-bold mb-1 text-center">Müşteri Başvurusu</h2>
                     <p class="text-center mb-3 opacity-75" style="font-size: 0.9rem;">Projelerinizi takip etmek için sisteme dahil olun.</p>
-                    <form asp-action="Register" method="post">
+                    <form asp-action="Register" method="post" novalidate>
+                        <div asp-validation-summary="All" class="text-warning small mb-2"></div>
                         <div class="row">
                             <div class="col-md-6 mb-2">
                                 <label class="form-label">Adınız</label>
-                                <input type="text" name="FirstName" class="form-control" required />
+                                <input type="text" name="FirstName" value="@Model?.FirstName" class="form-control" required maxlength="50" />
                             </div>
                             <div class="col-md-6 mb-2">
                                 <label class="form-label">Soyadınız</label>
-                                <input type="text" name="LastName" class="form-control" required />
+                                <input type="text" name="LastName" value="@Model?.LastName" class="form-control" required maxlength="50" />
                             </div>
                         </div>
                         <div class="mb-2">
                             <label class="form-label">E-Posta (Kurumsal)</label>
-                            <input type="email" name="Email" class="form-control" required />
+                            <input type="email" name="Email" value="@Model?.Email" class="form-control" required maxlength="100" />
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Şifre Belirleyin</label>
-                            <input type="password" name="Password" class="form-control" required />
+                            <input type="password" name="Password" class="form-control" required minlength="8" maxlength="100" />
                         </div>
                         <button type="submit" class="btn btn-neon w-100 mb-3">Kaydı Tamamla</button>
                         <div class="text-center">
