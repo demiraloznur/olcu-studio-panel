@@ -13,12 +13,14 @@ namespace MiniCRMProject.Data
 
         private readonly UserRepository users;
         private readonly ProjectRepository projects;
+        private readonly NoteRepository notes;
         private readonly PasswordService passwords;
 
-        public DemoSeeder(UserRepository users, ProjectRepository projects, PasswordService passwords)
+        public DemoSeeder(UserRepository users, ProjectRepository projects, NoteRepository notes, PasswordService passwords)
         {
             this.users = users;
             this.projects = projects;
+            this.notes = notes;
             this.passwords = passwords;
         }
 
@@ -50,6 +52,36 @@ namespace MiniCRMProject.Data
                 ProjectStage.Konsept, ProjectCategory.Ofis, "Osmangazi", can, 20, 75);
             AddProject("Mudanya pansiyon", "Altı odalı pansiyonun lobi ve kahvaltı salonu.",
                 ProjectStage.TeslimEdildi, ProjectCategory.Ticari, "Mudanya", selin, 300, -90);
+
+            AddNotes();
+        }
+
+        // Her projeye aşamasına uygun 1–3 not.
+        private void AddNotes()
+        {
+            string[] steps =
+            {
+                "Mekânda ölçü alındı, mevcut durum fotoğraflandı.",
+                "Konsept sunumu yapıldı; renk ve malzeme yönü onaylandı.",
+                "Uygulama çizimleri tamamlandı, metraj çıkarıldı.",
+                "Uygulama başladı; ustalarla haftalık şantiye toplantısı yapılıyor.",
+                "Proje teslim edildi, son kontroller tamamlandı."
+            };
+
+            foreach (ProjectModel project in projects.List(new ProjectListQuery { Sort = "eski" }))
+            {
+                int count = Math.Min((int)project.Stage, 3);
+                int first = (int)project.Stage - count;
+                for (int i = 0; i < count; i++)
+                {
+                    notes.Add(new ProjectNote
+                    {
+                        ProjectId = project.ProjectId,
+                        Body = steps[first + i],
+                        CreatedAt = project.CreatedAt.AddDays(7 * (i + 1))
+                    });
+                }
+            }
         }
 
         private int AddUser(string firstName, string lastName, string email, string password, string role)

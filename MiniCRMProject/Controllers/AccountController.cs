@@ -9,11 +9,13 @@ namespace MiniCRMProject.Controllers
     public class AccountController : Controller
     {
         private readonly UserRepository users;
+        private readonly ProjectRepository projects;
         private readonly PasswordService passwords;
 
-        public AccountController(UserRepository users, PasswordService passwords)
+        public AccountController(UserRepository users, ProjectRepository projects, PasswordService passwords)
         {
             this.users = users;
+            this.projects = projects;
             this.passwords = passwords;
         }
 
@@ -56,9 +58,14 @@ namespace MiniCRMProject.Controllers
 
             if (user != null && passwords.Verify(user.PasswordHash, password ?? ""))
             {
-                new SessionUser(user.UserId, user.FirstName + " " + user.LastName, user.Role)
-                    .WriteTo(HttpContext.Session);
+                SessionUser sessionUser = new SessionUser(user.UserId, user.FirstName + " " + user.LastName, user.Role);
+                sessionUser.WriteTo(HttpContext.Session);
 
+                if (!sessionUser.IsAdmin)
+                {
+                    List<ProjectModel> own = projects.List(new ProjectListQuery { CustomerId = sessionUser.Id });
+                    if (own.Count == 1) return RedirectToAction("Details", "Home", new { id = own[0].ProjectId });
+                }
                 return RedirectToAction("Index", "Home");
             }
 

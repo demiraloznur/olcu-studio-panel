@@ -38,4 +38,13 @@ CREATE TABLE [dbo].[Projects](
 );
 GO
 
+CREATE TABLE [dbo].[ProjectNotes](
+    [NoteId] INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    [ProjectId] INT NOT NULL,
+    [Body] NVARCHAR(1000) NOT NULL,
+    [CreatedAt] DATETIME NOT NULL DEFAULT (GETDATE()),
+    CONSTRAINT [FK_ProjectNotes_Projects] FOREIGN KEY ([ProjectId]) REFERENCES [dbo].[Projects]([ProjectId]) ON DELETE CASCADE
+);
+GO
+
 -- Demo verisi uygulama Development ortamında açılırken eklenir (Data/DemoSeeder.cs).

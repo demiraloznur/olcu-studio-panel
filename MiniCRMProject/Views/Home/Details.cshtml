@@ -1,0 +1,72 @@
+@model ProjectModel
+@{
+    Layout = null;
+    var notes = (List<ProjectNote>)ViewBag.Notes;
+    bool isAdmin = ViewBag.IsAdmin;
+}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@Model.ProjectName · ölçü studio</title>
+</head>
+<body>
+    <main>
+        <a href="/Home/Index">← Projeler</a>
+        <h1>@Model.ProjectName</h1>
+        <p>@Model.Category.DisplayName()@(string.IsNullOrEmpty(Model.District) ? "" : " · " + Model.District) · @Model.CustomerFullName</p>
+        @if (!string.IsNullOrEmpty(Model.Description))
+        {
+            <p>@Model.Description</p>
+        }
+
+        <section aria-labelledby="asama-baslik">
+            <h2 id="asama-baslik">Aşama: @Model.Stage.DisplayName()</h2>
+            <div role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="@Model.Stage.ProgressPercent()" aria-label="Proje ilerlemesi">
+                <span style="display:block;height:8px;width:@(Model.Stage.ProgressPercent())%;background:#1f2f5c"></span>
+            </div>
+            <ol>
+                @foreach (var stage in Enum.GetValues<ProjectStage>())
+                {
+                    <li aria-current="@(stage == Model.Stage ? "step" : null)">@stage.DisplayName()</li>
+                }
+            </ol>
+            <p>
+                Başlangıç: @Model.CreatedAt.ToString("dd.MM.yyyy") ·
+                Tahmini bitiş: @(Model.EndDate.HasValue ? Model.EndDate.Value.ToString("dd.MM.yyyy") : "Belirlenmedi")
+            </p>
+        </section>
+
+        <section aria-labelledby="not-baslik">
+            <h2 id="not-baslik">İlerleme notları</h2>
+            @if (isAdmin)
+            {
+                <form asp-action="AddNote" method="post">
+                    <input type="hidden" name="projectId" value="@Model.ProjectId" />
+                    <label for="body">Yeni not</label>
+                    <textarea name="body" id="body" rows="2" required maxlength="1000"></textarea>
+                    @if (TempData["NoteError"] is string noteError)
+                    {
+                        <p role="alert">@noteError</p>
+                    }
+                    <button type="submit">Notu ekle</button>
+                </form>
+            }
+            @if (notes.Count == 0)
+            {
+                <p>Henüz not eklenmedi.</p>
+            }
+            else
+            {
+                <ul>
+                    @foreach (var note in notes)
+                    {
+                        <li><time datetime="@note.CreatedAt.ToString("yyyy-MM-dd")">@note.CreatedAt.ToString("dd.MM.yyyy")</time> — @note.Body</li>
+                    }
+                </ul>
+            }
+        </section>
+    </main>
+</body>
+</html>

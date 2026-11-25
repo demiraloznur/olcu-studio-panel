@@ -6,6 +6,7 @@ builder.Services.AddSession();
 builder.Services.AddSingleton<MiniCRMProject.Data.SqlConnectionFactory>();
 builder.Services.AddScoped<MiniCRMProject.Data.UserRepository>();
 builder.Services.AddScoped<MiniCRMProject.Data.ProjectRepository>();
+builder.Services.AddScoped<MiniCRMProject.Data.NoteRepository>();
 builder.Services.AddSingleton<MiniCRMProject.Services.PasswordService>();
 builder.Services.AddScoped<MiniCRMProject.Data.DemoSeeder>();
 

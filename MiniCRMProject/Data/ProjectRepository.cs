@@ -38,13 +38,20 @@ namespace MiniCRMProject.Data
         public ProjectModel? Get(int id)
         {
             using SqlConnection connection = db.Create();
-            string sql = "SELECT * FROM Projects WHERE ProjectId = @id";
+            string sql = @"SELECT Projects.*, Users.FirstName + ' ' + Users.LastName AS CustomerFullName
+                           FROM Projects
+                           JOIN Users ON Projects.CustomerId = Users.UserId
+                           WHERE ProjectId = @id";
             SqlCommand command = new SqlCommand(sql, connection);
             command.Parameters.AddWithValue("@id", id);
 
             connection.Open();
             using SqlDataReader reader = command.ExecuteReader();
-            return reader.Read() ? Read(reader) : null;
+            if (!reader.Read()) return null;
+
+            ProjectModel model = Read(reader);
+            model.CustomerFullName = reader["CustomerFullName"].ToString()!;
+            return model;
         }
 
         public void Add(ProjectModel project)

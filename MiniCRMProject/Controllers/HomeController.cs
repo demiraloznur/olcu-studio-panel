@@ -9,11 +9,13 @@ namespace MiniCRMProject.Controllers
     {
         private readonly ProjectRepository projects;
         private readonly UserRepository users;
+        private readonly NoteRepository notes;
 
-        public HomeController(ProjectRepository projects, UserRepository users)
+        public HomeController(ProjectRepository projects, UserRepository users, NoteRepository notes)
         {
             this.projects = projects;
             this.users = users;
+            this.notes = notes;
         }
 
         [RequireLogin]
@@ -30,6 +32,37 @@ namespace MiniCRMProject.Controllers
             ViewBag.UserRole = user.Role;
 
             return View(list);
+        }
+
+        [RequireLogin]
+        public IActionResult Details(int id)
+        {
+            SessionUser user = SessionUser.From(HttpContext.Session)!;
+            ProjectModel? project = projects.Get(id);
+            if (project == null || !ProjectAccess.CanView(project, user)) return RedirectToAction("Index");
+
+            ViewBag.Notes = notes.ListForProject(id);
+            ViewBag.IsAdmin = user.IsAdmin;
+            return View(project);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [RequireAdmin]
+        public IActionResult AddNote(int projectId, string? body)
+        {
+            if (projects.Get(projectId) == null) return RedirectToAction("Index");
+
+            ProjectNote note = new ProjectNote { ProjectId = projectId, Body = body?.Trim() ?? "" };
+            if (!TryValidateModel(note))
+            {
+                TempData["NoteError"] = ModelState.Values.SelectMany(v => v.Errors).First().ErrorMessage;
+            }
+            else
+            {
+                notes.Add(note);
+            }
+            return RedirectToAction("Details", new { id = projectId });
         }
 
         [HttpGet]
