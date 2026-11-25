@@ -34,14 +34,23 @@ namespace MiniCRMProject.Controllers
             }
             if (!ModelState.IsValid) return View(model);
 
-            users.Add(new UserModel
+            try
             {
-                FirstName = model.FirstName.Trim(),
-                LastName = model.LastName.Trim(),
-                Email = model.Email.Trim(),
-                PasswordHash = passwords.Hash(model.Password),
-                Role = SessionUser.CustomerRole
-            });
+                users.Add(new UserModel
+                {
+                    FirstName = model.FirstName.Trim(),
+                    LastName = model.LastName.Trim(),
+                    Email = model.Email.Trim(),
+                    PasswordHash = passwords.Hash(model.Password),
+                    Role = SessionUser.CustomerRole
+                });
+            }
+            catch (DuplicateEmailException ex)
+            {
+                // Aynı anda gelen başka bir kayıt aynı e-postayı az önce almış olabilir.
+                ModelState.AddModelError(nameof(model.Email), ex.Message);
+                return View(model);
+            }
             return RedirectToAction("Login");
         }
 

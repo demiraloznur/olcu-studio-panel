@@ -65,7 +65,15 @@ namespace MiniCRMProject.Data
             command.Parameters.AddWithValue("@role", user.Role);
 
             connection.Open();
-            return (int)command.ExecuteScalar();
+            try
+            {
+                return (int)command.ExecuteScalar();
+            }
+            catch (SqlException ex) when (ex.Number == 2627 || ex.Number == 2601)
+            {
+                // 2627/2601: benzersizlik kuralı ihlali (aynı e-posta)
+                throw new DuplicateEmailException(ex);
+            }
         }
 
         // Her müşteri ve proje sayıları; projesi olmayan müşteri 0 ile görünür.
