@@ -1,41 +1,45 @@
 @model List<CustomerSummary>
 @{
-    Layout = null;
+    ViewData["Title"] = "Müşteriler";
 }
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Müşteriler · ölçü studio</title>
-</head>
-<body>
-    <main>
-        <a href="/Home/Index">← Projeler</a>
+
+<div class="sayfa-basi">
+    <div>
         <h1>Müşteriler</h1>
-        @if (Model.Count == 0)
-        {
-            <p>Henüz müşteri yok.</p>
-        }
-        else
-        {
-            <table>
+        <p>@Model.Count müşteri</p>
+    </div>
+</div>
+
+<section class="kart" aria-label="Müşteri listesi">
+    @if (Model.Count == 0)
+    {
+        <p class="bos">Henüz müşteri yok.</p>
+    }
+    else
+    {
+        <div class="tablo-sar">
+            <table class="tablo-kart">
                 <thead>
-                    <tr><th scope="col">Müşteri</th><th scope="col">E-posta</th><th scope="col">Proje</th><th scope="col">Devam eden</th></tr>
+                    <tr>
+                        <th scope="col">Müşteri</th>
+                        <th scope="col">Proje</th>
+                        <th scope="col">Devam eden</th>
+                    </tr>
                 </thead>
                 <tbody>
                     @foreach (var c in Model)
                     {
                         <tr>
-                            <td>@c.FullName</td>
-                            <td>@c.Email</td>
-                            <td>@c.ProjectCount</td>
-                            <td>@c.ActiveProjectCount</td>
+                            <td>
+                                <a class="proje-adi" href="/Home/Index?Search=@Uri.EscapeDataString(c.FullName)">@c.FullName</a>
+                                <span class="alt-bilgi">@c.Email</span>
+                            </td>
+                            <td class="sayi" data-etiket="Proje">@c.ProjectCount</td>
+                            <td class="sayi" data-etiket="Devam eden">@c.ActiveProjectCount</td>
                         </tr>
                     }
                 </tbody>
             </table>
-        }
-    </main>
-</body>
-</html>
+        </div>
+    }
+</section>

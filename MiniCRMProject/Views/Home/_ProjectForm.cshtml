@@ -1,0 +1,85 @@
+@model ProjectModel
+@{
+    bool isNew = Model.ProjectId == 0;
+    var customers = ViewBag.Customers as List<UserModel>;
+}
+@* Proje ekleme ve düzenleme formu *@
+<div asp-validation-summary="All" class="hatalar" role="alert"></div>
+
+@if (!isNew)
+{
+    <input type="hidden" name="ProjectId" value="@Model.ProjectId" />
+    <input type="hidden" name="CustomerId" value="@Model.CustomerId" />
+    <input type="hidden" name="CreatedAt" value="@Model.CreatedAt.ToString("yyyy-MM-dd")" />
+}
+
+<div class="form-izgara">
+    <div class="alan genis">
+        <label for="ProjectName">Proje adı</label>
+        <input type="text" id="ProjectName" name="ProjectName" value="@Model.ProjectName" required maxlength="150" placeholder="Nilüfer daire" />
+    </div>
+
+    @if (isNew)
+    {
+        <div class="alan">
+            <label for="CustomerId">Müşteri</label>
+            <select id="CustomerId" name="CustomerId" required>
+                <option value="0">Seçin…</option>
+                @foreach (var c in customers ?? new List<UserModel>())
+                {
+                    <option value="@c.UserId" selected="@(Model.CustomerId == c.UserId ? "selected" : null)">@c.FirstName @c.LastName</option>
+                }
+            </select>
+        </div>
+    }
+    else
+    {
+        <div class="alan">
+            <label for="musteri">Müşteri</label>
+            <input type="text" id="musteri" value="@Model.CustomerFullName" disabled />
+        </div>
+    }
+
+    <div class="alan">
+        <label for="District">İlçe</label>
+        <input type="text" id="District" name="District" value="@Model.District" maxlength="50" placeholder="Nilüfer" />
+    </div>
+
+    <div class="alan">
+        <label for="Category">Kategori</label>
+        <select id="Category" name="Category">
+            @foreach (var category in Enum.GetValues<ProjectCategory>())
+            {
+                <option value="@((byte)category)" selected="@(Model.Category == category ? "selected" : null)">@category.DisplayName()</option>
+            }
+        </select>
+    </div>
+
+    <div class="alan">
+        <label for="Stage">Aşama</label>
+        <select id="Stage" name="Stage">
+            @foreach (var stage in Enum.GetValues<ProjectStage>())
+            {
+                <option value="@((byte)stage)" selected="@(Model.Stage == stage ? "selected" : null)">@stage.DisplayName()</option>
+            }
+        </select>
+    </div>
+
+    <div class="alan">
+        <label for="EndDate">Tahmini bitiş</label>
+        <input type="date" id="EndDate" name="EndDate" value="@(Model.EndDate?.ToString("yyyy-MM-dd"))" />
+    </div>
+
+    @if (!isNew)
+    {
+        <div class="alan">
+            <label for="baslangic">Başlangıç</label>
+            <input type="text" id="baslangic" value="@Model.CreatedAt.ToString("dd.MM.yyyy")" disabled />
+        </div>
+    }
+
+    <div class="alan genis">
+        <label for="Description">Açıklama</label>
+        <textarea id="Description" name="Description" rows="3" maxlength="2000" placeholder="Mekân, ihtiyaçlar, kapsam">@Model.Description</textarea>
+    </div>
+</div>

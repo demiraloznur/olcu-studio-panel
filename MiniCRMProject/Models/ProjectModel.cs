@@ -20,10 +20,12 @@ namespace MiniCRMProject.Models
         [StringLength(50, ErrorMessage = "İlçe en fazla 50 karakter olabilir.")]
         public string? District { get; set; }
 
+        [Display(Name = "Müşteri")]
         [Range(1, int.MaxValue, ErrorMessage = "Bir müşteri seçin.")]
         public int CustomerId { get; set; }
 
         public DateTime CreatedAt { get; set; }
+        [Display(Name = "Tahmini bitiş")]
         public DateTime? EndDate { get; set; }
         public string? CustomerFullName { get; set; }
     }

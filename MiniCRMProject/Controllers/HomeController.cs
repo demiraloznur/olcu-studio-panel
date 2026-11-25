@@ -100,7 +100,7 @@ namespace MiniCRMProject.Controllers
         [RequireAdmin]
         public IActionResult Edit(int id)
         {
-            ViewBag.UserRole = SessionUser.AdminRole;
+
 
             ProjectModel? model = projects.Get(id);
             if (model == null) return RedirectToAction("Index");
@@ -112,9 +112,13 @@ namespace MiniCRMProject.Controllers
         [RequireAdmin]
         public IActionResult Edit(ProjectModel projectModel)
         {
+            ProjectModel? existing = projects.Get(projectModel.ProjectId);
+            if (existing == null) return RedirectToAction("Index");
+
             if (!ModelState.IsValid)
             {
-                ViewBag.UserRole = SessionUser.AdminRole;
+                projectModel.CustomerFullName = existing.CustomerFullName;
+                projectModel.CreatedAt = existing.CreatedAt;
                 return View(projectModel);
             }
 
@@ -125,9 +129,16 @@ namespace MiniCRMProject.Controllers
             catch (Exception)
             {
                 TempData["ErrorMessage"] = "Proje güncellenirken veritabanı kaynaklı bir hata oluştu.";
+                return RedirectToAction("Index");
             }
 
-            return RedirectToAction("Index");
+            return RedirectToAction("Details", new { id = projectModel.ProjectId });
+        }
+
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        public IActionResult Error()
+        {
+            return View(new ErrorViewModel { RequestId = System.Diagnostics.Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
 
         [HttpPost]

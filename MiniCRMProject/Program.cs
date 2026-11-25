@@ -1,6 +1,15 @@
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews(options =>
+{
+    // Model bağlama hatalarının Türkçe mesajları (ör. müşteri seçilmeden gönderilen form).
+    var messages = options.ModelBindingMessageProvider;
+    messages.SetAttemptedValueIsInvalidAccessor((value, field) => $"{field} için geçerli bir değer girin.");
+    messages.SetValueMustNotBeNullAccessor(value => "Bu alan zorunlu.");
+    messages.SetValueIsInvalidAccessor(value => "Lütfen geçerli bir değer girin.");
+    messages.SetValueMustBeANumberAccessor(field => "Lütfen bir sayı girin.");
+    messages.SetMissingBindRequiredValueAccessor(field => "Bu alan zorunlu.");
+});
 builder.Services.AddSession();
 
 builder.Services.AddSingleton<MiniCRMProject.Data.SqlConnectionFactory>();

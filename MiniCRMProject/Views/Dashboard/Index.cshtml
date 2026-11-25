@@ -1,57 +1,72 @@
 @model DashboardSummary
 @{
-    Layout = null;
+    ViewData["Title"] = "Özet";
+    int max = Math.Max(1, Model.ByStage.Values.DefaultIfEmpty(0).Max());
+    int active = Model.Total - Model.ByStage[ProjectStage.TeslimEdildi];
 }
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Özet · ölçü studio</title>
-</head>
-<body>
-    <main>
-        <a href="/Home/Index">← Projeler</a>
-        <h1>Özet</h1>
-        <p>Toplam proje: <strong>@Model.Total</strong></p>
 
-        <h2>Aşamalara göre</h2>
-        <ul>
+<div class="sayfa-basi">
+    <div>
+        <h1>Özet</h1>
+        <p>Stüdyonun genel durumu, @DateTime.Today.ToString("dd.MM.yyyy") itibarıyla.</p>
+    </div>
+</div>
+
+<div class="ozet-sayilar">
+    <div class="kart"><strong class="sayi">@Model.Total</strong><span>Toplam proje</span></div>
+    <div class="kart"><strong class="sayi">@active</strong><span>Devam eden</span></div>
+    <div class="kart"><strong class="sayi">@Model.Upcoming.Count</strong><span>@DashboardSummary.UpcomingDays gün içinde bitecek</span></div>
+    <div class="kart"><strong class="sayi @(Model.Overdue.Count > 0 ? "gecikti" : null)">@Model.Overdue.Count</strong><span>Tarihi geçen</span></div>
+</div>
+
+<div class="ozet-izgara">
+    <section class="kart" aria-labelledby="dagilim-baslik">
+        <h2 id="dagilim-baslik">Aşamalara göre</h2>
+        <ul class="dagilim">
             @foreach (var pair in Model.ByStage)
             {
-                <li>@pair.Key.DisplayName(): @pair.Value</li>
+                <li>
+                    <span>@pair.Key.DisplayName()</span>
+                    <span class="cubuk" aria-hidden="true"><span style="width: @(pair.Value * 100 / max)%"></span></span>
+                    <strong class="sayi">@pair.Value</strong>
+                </li>
             }
         </ul>
+    </section>
 
-        <h2>Önümüzdeki @DashboardSummary.UpcomingDays günde bitecekler</h2>
-        @if (Model.Upcoming.Count == 0)
-        {
-            <p>Önümüzdeki @DashboardSummary.UpcomingDays günde bitecek proje yok.</p>
-        }
-        else
-        {
-            <ul>
-                @foreach (var p in Model.Upcoming)
-                {
-                    <li><a href="/Home/Details/@p.ProjectId">@p.ProjectName</a> · @p.EndDate!.Value.ToString("dd.MM.yyyy") · @p.Stage.DisplayName()</li>
-                }
-            </ul>
-        }
+    <div>
+        <section class="kart" aria-labelledby="yakin-baslik">
+            <h2 id="yakin-baslik">Önümüzdeki @DashboardSummary.UpcomingDays gün</h2>
+            @if (Model.Upcoming.Count == 0)
+            {
+                <p class="bos">Bu süre içinde bitecek proje yok.</p>
+            }
+            else
+            {
+                <ul class="liste">
+                    @foreach (var p in Model.Upcoming)
+                    {
+                        <li><a class="proje-adi" href="/Home/Details/@p.ProjectId">@p.ProjectName</a><span class="sayi">@p.EndDate!.Value.ToString("dd.MM.yyyy")</span></li>
+                    }
+                </ul>
+            }
+        </section>
 
-        <h2>Tarihi geçenler</h2>
-        @if (Model.Overdue.Count == 0)
-        {
-            <p>Tarihi geçmiş proje yok.</p>
-        }
-        else
-        {
-            <ul>
-                @foreach (var p in Model.Overdue)
-                {
-                    <li><a href="/Home/Details/@p.ProjectId">@p.ProjectName</a> · @p.EndDate!.Value.ToString("dd.MM.yyyy") · @p.Stage.DisplayName()</li>
-                }
-            </ul>
-        }
-    </main>
-</body>
-</html>
+        <section class="kart" aria-labelledby="gecen-baslik">
+            <h2 id="gecen-baslik">Tarihi geçenler</h2>
+            @if (Model.Overdue.Count == 0)
+            {
+                <p class="bos">Tarihi geçmiş proje yok.</p>
+            }
+            else
+            {
+                <ul class="liste">
+                    @foreach (var p in Model.Overdue)
+                    {
+                        <li><a class="proje-adi" href="/Home/Details/@p.ProjectId">@p.ProjectName</a><span class="sayi gecikti">@p.EndDate!.Value.ToString("dd.MM.yyyy")</span></li>
+                    }
+                </ul>
+            }
+        </section>
+    </div>
+</div>

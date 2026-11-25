@@ -1,268 +1,146 @@
-﻿@model List<MiniCRMProject.Models.ProjectModel>
+@model List<ProjectModel>
 @{
-    Layout = null;
-    var role = ViewBag.UserRole;
+    ViewData["Title"] = "Projeler";
+    var q = (ProjectListQuery)ViewBag.Query;
+    bool isAdmin = ViewBag.UserRole == "Admin";
+    DateTime today = DateTime.Today;
 }
 
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Yönetim Paneli - NOVA</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="shortcut icon" href="https://cdn-icons-png.flaticon.com/512/2092/2092663.png?v=2" type="image/x-icon">
-    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/2092/2092663.png?v=2" type="image/x-icon">
+<div class="sayfa-basi">
+    <div>
+        <h1>Projeler</h1>
+        <p>@(isAdmin ? "Stüdyonun tüm projeleri." : $"Hoş geldiniz, {ViewBag.UserFullName}. Projelerinizin durumu aşağıda.")</p>
+    </div>
+    @if (isAdmin)
+    {
+        <a href="/Home/Create" class="dugme">+ Yeni proje</a>
+    }
+</div>
 
-    <style>
-        body {
-            background: linear-gradient(135deg, #1a103c 0%, #352168 100%);
-            font-family: 'Inter', sans-serif;
-            color: white;
-            min-height: 100vh;
-        }
+@if (TempData["ErrorMessage"] is string error)
+{
+    <p class="uyari" role="alert">@error</p>
+}
 
-        .glass-card {
-            background: rgba(255, 255, 255, 0.05) !important;
-            backdrop-filter: blur(15px);
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .btn-neon {
-            background: linear-gradient(to right, #8a2387, #e94057, #f27121);
-            color: white !important;
-            border: none;
-            font-weight: 600;
-        }
-
-        .btn-delete {
-            background: linear-gradient(to right, #e94057, #f27121);
-            color: white !important;
-            border: none;
-            font-weight: 600;
-        }
-
-        .table {
-            background-color: transparent !important;
-            color: white !important;
-            margin-bottom: 0;
-            --bs-table-bg: transparent !important;
-            --bs-table-striped-bg: transparent !important;
-        }
-
-            .table thead th {
-                color: #f27121 !important;
-                font-size: 0.85rem;
-                font-weight: 700;
-                text-transform: uppercase;
-                border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
-                background: transparent !important;
-                padding: 20px 15px;
-            }
-
-            .table tbody tr {
-                background-color: transparent !important;
-                border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
-            }
-
-            .table tbody td {
-                background-color: transparent !important;
-                color: white !important;
-            }
-
-        .status-badge {
-            border: 1px solid #4a90e2;
-            color: white;
-            padding: 3px 18px;
-            border-radius: 10px;
-            background: rgba(74, 144, 226, 0.2);
-            font-size: 0.85rem;
-        }
-
-        .customer-pill {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-        }
-
-        .action-icon-btn {
-            width: 34px;
-            height: 34px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: white;
-            background: transparent;
-            transition: 0.2s;
-        }
-
-            .action-icon-btn:hover {
-                background: rgba(255, 255, 255, 0.15);
-                transform: translateY(-2px);
-            }
-    </style>
-</head>
-<body>
-
-    <div class="container py-5">
-
-        <div class="glass-card p-4 shadow-lg mb-5">
-            <div class="d-flex justify-content-between align-items-center">
-
-                <div class="d-flex align-items-center">
-                    <img src="https://cdn-icons-png.flaticon.com/512/2092/2092663.png" style="width: 48px; height: 48px; margin-right: 15px;" alt="Logo">
-                    <div>
-                        <h3 class="mb-0 fw-bold">Hoş Geldin, <span style="color: #f27121;">@ViewBag.UserFullName</span></h3>
-                        <div class="mt-1 small text-white opacity-75">
-                            <i class="bi bi-shield-lock me-1"></i> Yetki: <strong>@role</strong>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="d-flex gap-3">
-                    @if (role == "Admin")
-                    {
-                        <a href="/Home/Create" class="btn btn-neon rounded-pill px-4">
-                            <i class="bi bi-plus-lg me-2"></i>Yeni Proje Tanımla
-                        </a>
-                    }
-                    <a href="/Account/Logout" class="btn btn-delete rounded-pill px-4">
-                        <i class="bi bi-box-arrow-right me-2"></i>Güvenli Çıkış
-                    </a>
-                </div>
-
-            </div>
-        </div>
-
-        <div class="d-flex align-items-center mb-4 px-1">
-            <img src="https://cdn-icons-png.flaticon.com/512/2092/2092663.png" style="width: 24px; margin-right: 10px; filter: brightness(0) invert(1);" alt="Aktif Projeler">
-            <h4 class="mb-0 fw-bold text-uppercase" style="letter-spacing: 1px;">AKTİF PROJELER</h4>
-        </div>
-
-        @{ var q = (ProjectListQuery)ViewBag.Query; }
-        <form method="get" action="/Home/Index" class="glass-card p-3 mb-3 d-flex flex-wrap gap-2 align-items-end" role="search">
-            <div class="flex-grow-1">
-                <label class="form-label small" for="Search">Ara</label>
-                <input type="search" name="Search" id="Search" value="@q.Search" class="form-control" placeholder="Proje, müşteri ya da ilçe" />
-            </div>
-            <div>
-                <label class="form-label small" for="fCategory">Kategori</label>
-                <select name="Category" id="fCategory" class="form-select">
-                    <option value="">Tümü</option>
-                    @foreach (var c in Enum.GetValues<ProjectCategory>())
-                    {
-                        <option value="@((byte)c)" selected="@(q.Category == c ? "selected" : null)">@c.DisplayName()</option>
-                    }
-                </select>
-            </div>
-            <div>
-                <label class="form-label small" for="fStage">Aşama</label>
-                <select name="Stage" id="fStage" class="form-select">
-                    <option value="">Tümü</option>
-                    @foreach (var st in Enum.GetValues<ProjectStage>())
-                    {
-                        <option value="@((byte)st)" selected="@(q.Stage == st ? "selected" : null)">@st.DisplayName()</option>
-                    }
-                </select>
-            </div>
-            <div>
-                <label class="form-label small" for="fSort">Sırala</label>
-                <select name="Sort" id="fSort" class="form-select">
-                    <option value="yeni" selected="@(q.Sort == "yeni" ? "selected" : null)">Yeniden eskiye</option>
-                    <option value="eski" selected="@(q.Sort == "eski" ? "selected" : null)">Eskiden yeniye</option>
-                    <option value="bitis" selected="@(q.Sort == "bitis" ? "selected" : null)">Bitiş tarihine göre</option>
-                </select>
-            </div>
-            <button type="submit" class="btn btn-neon">Uygula</button>
-            @if (q.HasFilter)
+<form method="get" action="/Home/Index" class="kart filtre" role="search" aria-label="Projeleri filtrele">
+    <div class="alan arama">
+        <label for="Search">Ara</label>
+        <input type="search" id="Search" name="Search" value="@q.Search" placeholder="Proje, müşteri ya da ilçe" />
+    </div>
+    <div class="alan">
+        <label for="fCategory">Kategori</label>
+        <select id="fCategory" name="Category">
+            <option value="">Tümü</option>
+            @foreach (var c in Enum.GetValues<ProjectCategory>())
             {
-                <a href="/Home/Index" class="btn btn-delete">Temizle</a>
+                <option value="@((byte)c)" selected="@(q.Category == c ? "selected" : null)">@c.DisplayName()</option>
             }
-        </form>
-
-        @if (Model.Count == 0)
+        </select>
+    </div>
+    <div class="alan">
+        <label for="fStage">Aşama</label>
+        <select id="fStage" name="Stage">
+            <option value="">Tümü</option>
+            @foreach (var st in Enum.GetValues<ProjectStage>())
+            {
+                <option value="@((byte)st)" selected="@(q.Stage == st ? "selected" : null)">@st.DisplayName()</option>
+            }
+        </select>
+    </div>
+    <div class="alan">
+        <label for="fSort">Sırala</label>
+        <select id="fSort" name="Sort">
+            <option value="yeni" selected="@(q.Sort == "yeni" ? "selected" : null)">Yeniden eskiye</option>
+            <option value="eski" selected="@(q.Sort == "eski" ? "selected" : null)">Eskiden yeniye</option>
+            <option value="bitis" selected="@(q.Sort == "bitis" ? "selected" : null)">Bitiş tarihine göre</option>
+        </select>
+    </div>
+    <div class="dugmeler">
+        <button type="submit" class="dugme">Uygula</button>
+        @if (q.HasFilter)
         {
-            <div class="glass-card p-4 text-center">
-                @if (q.HasFilter)
-                {
-                    <text>Aramanıza uygun proje bulunamadı.</text>
-                }
-                else if (role == "Customer")
-                {
-                    <text>Henüz size atanmış bir proje yok. Stüdyo projenizi oluşturduğunda burada görünecek.</text>
-                }
-                else
-                {
-                    <text>Henüz proje yok.</text>
-                }
-            </div>
-        }
-
-        else
-        {
-        <div class="glass-card shadow-lg p-3">
-            <div class="table-responsive">
-                <table class="table align-middle">
-                    <thead>
-                        <tr>
-                            <th class="ps-3" style="width: 35%">PROJE VE DETAY</th>
-                            <th>MÜŞTERİ</th>
-                            <th class="text-center">AŞAMA</th>
-                            <th class="text-center">TARİHLER</th>
-                            <th class="text-end pe-4">İŞLEMLER</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var item in Model)
-                        {
-                            <tr>
-                                <td class="ps-3 py-4">
-                                    <a href="/Home/Details/@item.ProjectId" class="fw-bold fs-5 text-white text-decoration-none">@item.ProjectName</a>
-                                    <div class="opacity-75 small mt-1">@item.Description</div>
-                                </td>
-                                <td>
-                                    <span class="customer-pill">
-                                        <i class="bi bi-person-circle me-1"></i> @item.CustomerFullName
-                                    </span>
-                                </td>
-                                <td class="text-center">
-                                    <span class="status-badge">@item.Stage.DisplayName()</span>
-                                    <div class="small opacity-75 mt-1">@item.Category.DisplayName()@(string.IsNullOrEmpty(item.District) ? "" : " · " + item.District)</div>
-                                </td>
-                                <td class="text-center small">
-                                    <div class="mb-1"><span class="opacity-50 me-1">Başlama:</span> <span class="fw-bold">@item.CreatedAt.ToString("dd.MM.yyyy")</span></div>
-                                    <div><span class="opacity-50 me-1">Bitiş:</span> <span class="fw-bold" style="color: #f27121;">@(item.EndDate.HasValue? item.EndDate.Value.ToString("dd.MM.yyyy") : "Belirsiz")</span></div>
-                                </td>
-                                <td class="text-end pe-4">
-                                    <div class="d-flex justify-content-end gap-2">
-
-                                        @if (role == "Admin")
-                                        {
-                                            <a href="/Home/Edit/@item.ProjectId" class="action-icon-btn text-info" title="Durumu Güncelle">
-                                                <i class="bi bi-pencil-fill"></i>
-                                            </a>
-                                            <form asp-action="Delete" asp-route-id="@item.ProjectId" method="post" style="display:inline;">
-                                                <button type="submit" class="action-icon-btn text-danger" onclick="return confirm('Silmek istediğine emin misin?')" title="Projeyi Sil">
-                                                    <i class="bi bi-trash-fill"></i>
-                                                </button>
-                                            </form>
-                                        }
-                                    </div>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-        </div>
+            <a href="/Home/Index" class="dugme ikincil">Temizle</a>
         }
     </div>
+</form>
 
-</body>
-</html>
+<section class="kart" aria-label="Proje listesi">
+    @if (Model.Count == 0)
+    {
+        <p class="bos">
+            @if (q.HasFilter)
+            {
+                <text>Aramanıza uygun proje bulunamadı.</text>
+            }
+            else if (!isAdmin)
+            {
+                <text>Henüz size atanmış bir proje yok. Stüdyo projenizi oluşturduğunda burada görünecek.</text>
+            }
+            else
+            {
+                <text>Henüz proje yok. İlk projeyi eklemek için “Yeni proje”yi kullanın.</text>
+            }
+        </p>
+    }
+    else
+    {
+        <div class="tablo-sar">
+            <table class="tablo-kart">
+                <thead>
+                    <tr>
+                        <th scope="col">Proje</th>
+                        @if (isAdmin)
+                        {
+                            <th scope="col">Müşteri</th>
+                        }
+                        <th scope="col">Aşama</th>
+                        <th scope="col">Bitiş</th>
+                        @if (isAdmin)
+                        {
+                            <th scope="col"><span class="gizli">İşlemler</span></th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        bool late = item.EndDate.HasValue && item.EndDate.Value.Date < today && item.Stage != ProjectStage.TeslimEdildi;
+                        <tr>
+                            <td>
+                                <a class="proje-adi" href="/Home/Details/@item.ProjectId">@item.ProjectName</a>
+                                <span class="alt-bilgi">@item.Category.DisplayName()@(string.IsNullOrEmpty(item.District) ? "" : " · " + item.District)</span>
+                            </td>
+                            @if (isAdmin)
+                            {
+                                <td data-etiket="Müşteri">@item.CustomerFullName</td>
+                            }
+                            <td><span class="rozet asama-@((byte)item.Stage)">@item.Stage.DisplayName()</span></td>
+                            <td class="sayi @(late ? "gecikti" : null)" data-etiket="Bitiş">
+                                @(item.EndDate.HasValue ? item.EndDate.Value.ToString("dd.MM.yyyy") : "Belirlenmedi")
+                                @if (late)
+                                {
+                                    <span class="gizli">(tarihi geçti)</span>
+                                }
+                            </td>
+                            @if (isAdmin)
+                            {
+                                <td>
+                                    <div class="islemler">
+                                        <a class="ikon-dugme" href="/Home/Edit/@item.ProjectId" title="Düzenle" aria-label="@item.ProjectName projesini düzenle">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z" /></svg>
+                                        </a>
+                                        <form asp-action="Delete" asp-route-id="@item.ProjectId" method="post" onsubmit="return confirm('@item.ProjectName projesi ve notları silinsin mi?');">
+                                            <button type="submit" class="ikon-dugme tehlike" title="Sil" aria-label="@item.ProjectName projesini sil">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" /></svg>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>

@@ -1,4 +1,22 @@
-﻿// Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
-// for details on configuring this project to bundle and minify static web assets.
+// Dar ekranda sol menüyü aç/kapat.
+(function () {
+    const button = document.querySelector('.menu-dugme');
+    const menu = document.getElementById('yan-menu');
+    if (!button || !menu) return;
 
-// Write your JavaScript code.
+    function setOpen(open) {
+        menu.classList.toggle('acik', open);
+        button.setAttribute('aria-expanded', String(open));
+    }
+
+    button.addEventListener('click', function () {
+        setOpen(!menu.classList.contains('acik'));
+    });
+
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape' && menu.classList.contains('acik')) {
+            setOpen(false);
+            button.focus();
+        }
+    });
+})();
