@@ -6,8 +6,16 @@ builder.Services.AddSession();
 builder.Services.AddSingleton<MiniCRMProject.Data.SqlConnectionFactory>();
 builder.Services.AddScoped<MiniCRMProject.Data.UserRepository>();
 builder.Services.AddScoped<MiniCRMProject.Data.ProjectRepository>();
+builder.Services.AddSingleton<MiniCRMProject.Services.PasswordService>();
+builder.Services.AddScoped<MiniCRMProject.Data.DemoSeeder>();
 
 var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
+{
+    using var scope = app.Services.CreateScope();
+    scope.ServiceProvider.GetRequiredService<MiniCRMProject.Data.DemoSeeder>().SeedIfEmpty();
+}
 
 if (!app.Environment.IsDevelopment())
 {

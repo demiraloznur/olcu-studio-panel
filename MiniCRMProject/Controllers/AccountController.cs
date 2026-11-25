@@ -1,16 +1,19 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using MiniCRMProject.Data;
 using MiniCRMProject.Models;
+using MiniCRMProject.Services;
 
 namespace MiniCRMProject.Controllers
 {
     public class AccountController : Controller
     {
         private readonly UserRepository users;
+        private readonly PasswordService passwords;
 
-        public AccountController(UserRepository users)
+        public AccountController(UserRepository users, PasswordService passwords)
         {
             this.users = users;
+            this.passwords = passwords;
         }
 
         [HttpGet]
@@ -20,8 +23,9 @@ namespace MiniCRMProject.Controllers
         }
 
         [HttpPost]
-        public IActionResult Register(UserModel user)
+        public IActionResult Register(UserModel user, string password)
         {
+            user.PasswordHash = passwords.Hash(password);
             user.Role = "Customer";
             users.Add(user);
             return RedirectToAction("Login");
@@ -38,7 +42,7 @@ namespace MiniCRMProject.Controllers
         {
             UserModel? user = users.GetByEmail(email);
 
-            if (user != null && user.Password == password)
+            if (user != null && passwords.Verify(user.PasswordHash, password))
             {
                 HttpContext.Session.SetInt32("UserId", user.UserId);
                 HttpContext.Session.SetString("UserFullName", user.FirstName + " " + user.LastName);

@@ -12,10 +12,18 @@ namespace MiniCRMProject.Data
             this.db = db;
         }
 
+        public bool Any()
+        {
+            using SqlConnection connection = db.Create();
+            SqlCommand command = new SqlCommand("SELECT CASE WHEN EXISTS (SELECT 1 FROM Users) THEN 1 ELSE 0 END", connection);
+            connection.Open();
+            return (int)command.ExecuteScalar() == 1;
+        }
+
         public UserModel? GetByEmail(string email)
         {
             using SqlConnection connection = db.Create();
-            string sql = "SELECT UserId, FirstName, LastName, Email, Password, Role FROM Users WHERE Email = @email";
+            string sql = "SELECT UserId, FirstName, LastName, Email, PasswordHash, Role FROM Users WHERE Email = @email";
             SqlCommand command = new SqlCommand(sql, connection);
             command.Parameters.AddWithValue("@email", email);
 
@@ -29,7 +37,7 @@ namespace MiniCRMProject.Data
                 FirstName = reader["FirstName"].ToString()!,
                 LastName = reader["LastName"].ToString()!,
                 Email = reader["Email"].ToString()!,
-                Password = reader["Password"].ToString()!,
+                PasswordHash = reader["PasswordHash"].ToString()!,
                 Role = reader["Role"].ToString()!
             };
         }
@@ -37,14 +45,14 @@ namespace MiniCRMProject.Data
         public int Add(UserModel user)
         {
             using SqlConnection connection = db.Create();
-            string sql = @"INSERT INTO Users (FirstName, LastName, Email, Password, Role)
+            string sql = @"INSERT INTO Users (FirstName, LastName, Email, PasswordHash, Role)
                            OUTPUT INSERTED.UserId
-                           VALUES (@firstName, @lastName, @email, @password, @role)";
+                           VALUES (@firstName, @lastName, @email, @passwordHash, @role)";
             SqlCommand command = new SqlCommand(sql, connection);
             command.Parameters.AddWithValue("@firstName", user.FirstName);
             command.Parameters.AddWithValue("@lastName", user.LastName);
             command.Parameters.AddWithValue("@email", user.Email);
-            command.Parameters.AddWithValue("@password", user.Password);
+            command.Parameters.AddWithValue("@passwordHash", user.PasswordHash);
             command.Parameters.AddWithValue("@role", user.Role);
 
             connection.Open();
