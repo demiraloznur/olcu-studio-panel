@@ -1,70 +1,32 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
+using MiniCRMProject.Data;
 using MiniCRMProject.Models;
 
 namespace MiniCRMProject.Controllers
 {
     public class HomeController : Controller
     {
-        string connectionString;
+        private readonly ProjectRepository projects;
+        private readonly UserRepository users;
 
-        public HomeController(IConfiguration configuration)
+        public HomeController(ProjectRepository projects, UserRepository users)
         {
-            connectionString = configuration.GetConnectionString("DefaultConnection");
+            this.projects = projects;
+            this.users = users;
         }
 
         public IActionResult Index()
         {
-            string role = HttpContext.Session.GetString("UserRole");
+            string? role = HttpContext.Session.GetString("UserRole");
             if (string.IsNullOrEmpty(role)) return RedirectToAction("Login", "Account");
 
-            List<ProjectModel> projects = new List<ProjectModel>();
             int? userId = HttpContext.Session.GetInt32("UserId");
-
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                string sql = @"SELECT Projects.*, Users.FirstName + ' ' + Users.LastName as CustomerFullName 
-                               FROM Projects 
-                               JOIN Users ON Projects.CustomerId = Users.UserId";
-
-                if (role == "Customer")
-                {
-                    sql += " WHERE Projects.CustomerId = @uid";
-                }
-
-                SqlCommand command = new SqlCommand(sql, connection);
-
-                if (role == "Customer")
-                {
-                    command.Parameters.AddWithValue("@uid", userId);
-                }
-
-                connection.Open();
-                SqlDataReader reader = command.ExecuteReader();
-                while (reader.Read())
-                {
-                    ProjectModel model = new ProjectModel();
-                    model.ProjectId = Convert.ToInt32(reader["ProjectId"]);
-                    model.ProjectName = reader["ProjectName"].ToString();
-                    model.Description = reader["Description"].ToString();
-                    model.Status = reader["Status"].ToString();
-                    model.CustomerId = Convert.ToInt32(reader["CustomerId"]);
-                    model.CreatedAt = Convert.ToDateTime(reader["CreatedAt"]);
-
-                    if (reader["EndDate"] != DBNull.Value)
-                    {
-                        model.EndDate = Convert.ToDateTime(reader["EndDate"]);
-                    }
-
-                    model.CustomerFullName = reader["CustomerFullName"].ToString();
-                    projects.Add(model);
-                }
-            }
+            List<ProjectModel> list = projects.List(role == "Customer" ? userId : null);
 
             ViewBag.UserFullName = HttpContext.Session.GetString("UserFullName");
             ViewBag.UserRole = role;
 
-            return View(projects);
+            return View(list);
         }
 
         [HttpGet]
@@ -72,24 +34,7 @@ namespace MiniCRMProject.Controllers
         {
             if (HttpContext.Session.GetString("UserRole") != "Admin") return RedirectToAction("Index");
 
-            List<UserModel> customers = new List<UserModel>();
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                string sql = "SELECT UserId, FirstName, LastName FROM Users WHERE Role = 'Customer'";
-                SqlCommand command = new SqlCommand(sql, connection);
-
-                connection.Open();
-                SqlDataReader reader = command.ExecuteReader();
-                while (reader.Read())
-                {
-                    UserModel customer = new UserModel();
-                    customer.UserId = (int)reader["UserId"];
-                    customer.FirstName = reader["FirstName"].ToString();
-                    customer.LastName = reader["LastName"].ToString();
-                    customers.Add(customer);
-                }
-            }
-            ViewBag.Customers = customers;
+            ViewBag.Customers = users.GetCustomers();
             return View();
         }
 
@@ -99,31 +44,7 @@ namespace MiniCRMProject.Controllers
         {
             try
             {
-                using (SqlConnection connection = new SqlConnection(connectionString))
-                {
-                    string sql = @"INSERT INTO Projects (ProjectName, Description, Status, CustomerId, CreatedAt, EndDate) 
-                           VALUES (@pName, @pDesc, @pStatus, @pCust, @pDate, @pEndDate)";
-
-                    SqlCommand command = new SqlCommand(sql, connection);
-
-                    command.Parameters.AddWithValue("@pName", projectModel.ProjectName);
-
-                    string desc = projectModel.Description;
-                    if (desc == null) desc = "";
-
-                    command.Parameters.AddWithValue("@pDesc", desc);
-                    command.Parameters.AddWithValue("@pStatus", projectModel.Status);
-                    command.Parameters.AddWithValue("@pCust", projectModel.CustomerId);
-                    command.Parameters.AddWithValue("@pDate", DateTime.Now);
-
-                    if (projectModel.EndDate.HasValue)
-                        command.Parameters.AddWithValue("@pEndDate", projectModel.EndDate.Value);
-                    else
-                        command.Parameters.AddWithValue("@pEndDate", DBNull.Value);
-
-                    connection.Open();
-                    command.ExecuteNonQuery();
-                }
+                projects.Add(projectModel);
             }
             catch (Exception)
             {
@@ -138,30 +59,7 @@ namespace MiniCRMProject.Controllers
         {
             ViewBag.UserRole = HttpContext.Session.GetString("UserRole");
 
-            ProjectModel model = new ProjectModel();
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                string sql = "SELECT * FROM Projects WHERE ProjectId = @id";
-                SqlCommand command = new SqlCommand(sql, connection);
-                command.Parameters.AddWithValue("@id", id);
-
-                connection.Open();
-                SqlDataReader reader = command.ExecuteReader();
-                if (reader.Read())
-                {
-                    model.ProjectId = Convert.ToInt32(reader["ProjectId"]);
-                    model.ProjectName = reader["ProjectName"].ToString();
-                    model.Description = reader["Description"].ToString();
-                    model.Status = reader["Status"].ToString();
-                    model.CustomerId = Convert.ToInt32(reader["CustomerId"]);
-                    model.CreatedAt = Convert.ToDateTime(reader["CreatedAt"]);
-
-                    if (reader["EndDate"] != DBNull.Value)
-                    {
-                        model.EndDate = Convert.ToDateTime(reader["EndDate"]);
-                    }
-                }
-            }
+            ProjectModel model = projects.Get(id) ?? new ProjectModel();
             return View(model);
         }
 
@@ -171,32 +69,7 @@ namespace MiniCRMProject.Controllers
         {
             try
             {
-                using (SqlConnection connection = new SqlConnection(connectionString))
-                {
-                    string sql = @"UPDATE Projects SET ProjectName = @name, 
-                           Description = @description, 
-                           Status = @status,
-                           EndDate = @endDate
-                           WHERE ProjectId = @id";
-
-                    SqlCommand command = new SqlCommand(sql, connection);
-                    command.Parameters.AddWithValue("@name", projectModel.ProjectName);
-
-                    string desc = projectModel.Description;
-                    if (desc == null) desc = "";
-
-                    command.Parameters.AddWithValue("@description", desc);
-                    command.Parameters.AddWithValue("@status", projectModel.Status);
-                    command.Parameters.AddWithValue("@id", projectModel.ProjectId);
-
-                    if (projectModel.EndDate.HasValue)
-                        command.Parameters.AddWithValue("@endDate", projectModel.EndDate.Value);
-                    else
-                        command.Parameters.AddWithValue("@endDate", DBNull.Value);
-
-                    connection.Open();
-                    command.ExecuteNonQuery();
-                }
+                projects.Update(projectModel);
             }
             catch (Exception)
             {
@@ -214,15 +87,7 @@ namespace MiniCRMProject.Controllers
 
             try
             {
-                using (SqlConnection connection = new SqlConnection(connectionString))
-                {
-                    string sql = "DELETE FROM Projects WHERE ProjectId = @id";
-                    SqlCommand command = new SqlCommand(sql, connection);
-                    command.Parameters.AddWithValue("@id", id);
-
-                    connection.Open();
-                    command.ExecuteNonQuery();
-                }
+                projects.Delete(id);
             }
             catch (Exception)
             {
@@ -233,4 +98,3 @@ namespace MiniCRMProject.Controllers
         }
     }
 }
-

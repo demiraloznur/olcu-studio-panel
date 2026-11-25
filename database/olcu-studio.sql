@@ -1,17 +1,18 @@
--- Mini CRM veri tabanı (okul teslimindeki şema)
--- Çalıştırma: sqlcmd -S .\SQLEXPRESS -E -f 65001 -i database\MiniCrmDb.sql
+-- ölçü studio paneli veri tabanı: OlcuStudioDb'yi sıfırdan kurar (varsa silinir).
+-- Çalıştırma: sqlcmd -S .\SQLEXPRESS -E -f 65001 -i database\olcu-studio.sql
 -- Örnek veriler uydurmadır.
 
 USE [master];
 GO
-IF DB_ID('MiniCrmDb') IS NOT NULL
+IF DB_ID('OlcuStudioDb') IS NOT NULL
 BEGIN
-    RAISERROR('MiniCrmDb zaten var; betik mevcut veri tabanına dokunmadan durdu.', 20, 1) WITH LOG;
+    ALTER DATABASE [OlcuStudioDb] SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+    DROP DATABASE [OlcuStudioDb];
 END
 GO
-CREATE DATABASE [MiniCrmDb];
+CREATE DATABASE [OlcuStudioDb] COLLATE Turkish_CI_AS;
 GO
-USE [MiniCrmDb];
+USE [OlcuStudioDb];
 GO
 
 CREATE TABLE [dbo].[Users](

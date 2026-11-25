@@ -1,20 +1,16 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
+using MiniCRMProject.Data;
 using MiniCRMProject.Models;
-using Microsoft.Extensions.Configuration;
-using Microsoft.AspNetCore.Http;
-using System.Collections.Generic;
-using System;
 
 namespace MiniCRMProject.Controllers
 {
     public class AccountController : Controller
     {
-        string connectionString;
+        private readonly UserRepository users;
 
-        public AccountController(IConfiguration configuration)
+        public AccountController(UserRepository users)
         {
-            connectionString = configuration.GetConnectionString("DefaultConnection");
+            this.users = users;
         }
 
         [HttpGet]
@@ -26,20 +22,8 @@ namespace MiniCRMProject.Controllers
         [HttpPost]
         public IActionResult Register(UserModel user)
         {
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                string sql = @"INSERT INTO Users (FirstName, LastName, Email, Password, Role) 
-                               VALUES (@firstName, @lastName, @email, @password, 'Customer')";
-
-                SqlCommand command = new SqlCommand(sql, connection);
-                command.Parameters.AddWithValue("@firstName", user.FirstName);
-                command.Parameters.AddWithValue("@lastName", user.LastName);
-                command.Parameters.AddWithValue("@email", user.Email);
-                command.Parameters.AddWithValue("@password", user.Password);
-
-                connection.Open();
-                command.ExecuteNonQuery();
-            }
+            user.Role = "Customer";
+            users.Add(user);
             return RedirectToAction("Login");
         }
 
@@ -52,25 +36,15 @@ namespace MiniCRMProject.Controllers
         [HttpPost]
         public IActionResult Login(string email, string password)
         {
-            using (SqlConnection connection = new SqlConnection(connectionString))
+            UserModel? user = users.GetByEmail(email);
+
+            if (user != null && user.Password == password)
             {
-                string sql = "SELECT * FROM Users WHERE Email = @email AND Password = @password";
+                HttpContext.Session.SetInt32("UserId", user.UserId);
+                HttpContext.Session.SetString("UserFullName", user.FirstName + " " + user.LastName);
+                HttpContext.Session.SetString("UserRole", user.Role);
 
-                SqlCommand command = new SqlCommand(sql, connection);
-                command.Parameters.AddWithValue("@email", email);
-                command.Parameters.AddWithValue("@password", password);
-
-                connection.Open();
-                SqlDataReader reader = command.ExecuteReader();
-
-                if (reader.Read())
-                {
-                    HttpContext.Session.SetInt32("UserId", Convert.ToInt32(reader["UserId"]));
-                    HttpContext.Session.SetString("UserFullName", reader["FirstName"].ToString() + " " + reader["LastName"].ToString());
-                    HttpContext.Session.SetString("UserRole", reader["Role"].ToString());
-
-                    return RedirectToAction("Index", "Home");
-                }
+                return RedirectToAction("Index", "Home");
             }
 
             ViewBag.Error = "E-posta veya şifre hatalı. Lütfen tekrar deneyin.";
