@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using MiniCRMProject.Data;
 using MiniCRMProject.Models;
+using MiniCRMProject.Security;
 using MiniCRMProject.Services;
 
 namespace MiniCRMProject.Controllers
@@ -44,9 +45,8 @@ namespace MiniCRMProject.Controllers
 
             if (user != null && passwords.Verify(user.PasswordHash, password))
             {
-                HttpContext.Session.SetInt32("UserId", user.UserId);
-                HttpContext.Session.SetString("UserFullName", user.FirstName + " " + user.LastName);
-                HttpContext.Session.SetString("UserRole", user.Role);
+                new SessionUser(user.UserId, user.FirstName + " " + user.LastName, user.Role)
+                    .WriteTo(HttpContext.Session);
 
                 return RedirectToAction("Index", "Home");
             }

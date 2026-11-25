@@ -1,6 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using MiniCRMProject.Data;
 using MiniCRMProject.Models;
+using MiniCRMProject.Security;
 
 namespace MiniCRMProject.Controllers
 {
@@ -15,31 +16,29 @@ namespace MiniCRMProject.Controllers
             this.users = users;
         }
 
+        [RequireLogin]
         public IActionResult Index()
         {
-            string? role = HttpContext.Session.GetString("UserRole");
-            if (string.IsNullOrEmpty(role)) return RedirectToAction("Login", "Account");
+            SessionUser user = SessionUser.From(HttpContext.Session)!;
+            List<ProjectModel> list = projects.List(user.IsAdmin ? null : user.Id);
 
-            int? userId = HttpContext.Session.GetInt32("UserId");
-            List<ProjectModel> list = projects.List(role == "Customer" ? userId : null);
-
-            ViewBag.UserFullName = HttpContext.Session.GetString("UserFullName");
-            ViewBag.UserRole = role;
+            ViewBag.UserFullName = user.FullName;
+            ViewBag.UserRole = user.Role;
 
             return View(list);
         }
 
         [HttpGet]
+        [RequireAdmin]
         public IActionResult Create()
         {
-            if (HttpContext.Session.GetString("UserRole") != "Admin") return RedirectToAction("Index");
-
             ViewBag.Customers = users.GetCustomers();
             return View();
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [RequireAdmin]
         public IActionResult Create(ProjectModel projectModel)
         {
             try
@@ -55,16 +54,19 @@ namespace MiniCRMProject.Controllers
         }
 
         [HttpGet]
+        [RequireAdmin]
         public IActionResult Edit(int id)
         {
-            ViewBag.UserRole = HttpContext.Session.GetString("UserRole");
+            ViewBag.UserRole = SessionUser.AdminRole;
 
-            ProjectModel model = projects.Get(id) ?? new ProjectModel();
+            ProjectModel? model = projects.Get(id);
+            if (model == null) return RedirectToAction("Index");
             return View(model);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [RequireAdmin]
         public IActionResult Edit(ProjectModel projectModel)
         {
             try
@@ -81,10 +83,9 @@ namespace MiniCRMProject.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [RequireAdmin]
         public IActionResult Delete(int id)
         {
-            if (HttpContext.Session.GetString("UserRole") != "Admin") return RedirectToAction("Index");
-
             try
             {
                 projects.Delete(id);

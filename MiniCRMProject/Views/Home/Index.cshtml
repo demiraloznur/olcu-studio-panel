@@ -180,12 +180,11 @@
                                 <td class="text-end pe-4">
                                     <div class="d-flex justify-content-end gap-2">
 
-                                        <a href="/Home/Edit/@item.ProjectId" class="action-icon-btn text-info" title="Durumu Güncelle">
-                                            <i class="bi bi-pencil-fill"></i>
-                                        </a>
-
                                         @if (role == "Admin")
                                         {
+                                            <a href="/Home/Edit/@item.ProjectId" class="action-icon-btn text-info" title="Durumu Güncelle">
+                                                <i class="bi bi-pencil-fill"></i>
+                                            </a>
                                             <form asp-action="Delete" asp-route-id="@item.ProjectId" method="post" style="display:inline;">
                                                 <button type="submit" class="action-icon-btn text-danger" onclick="return confirm('Silmek istediğine emin misin?')" title="Projeyi Sil">
                                                     <i class="bi bi-trash-fill"></i>
