@@ -71,6 +71,24 @@ public class ValidationTests
     }
 
     [Fact]
+    public void Gecersiz_asama_reddedilir()
+    {
+        var project = new ProjectModel { ProjectName = "Nilüfer daire", CustomerId = 2, Stage = (ProjectStage)9 };
+
+        var error = Assert.Single(Validate(project));
+        Assert.Equal("Geçerli bir aşama seçin.", error.ErrorMessage);
+    }
+
+    [Fact]
+    public void Gecersiz_kategori_reddedilir()
+    {
+        var project = new ProjectModel { ProjectName = "Nilüfer daire", CustomerId = 2, Category = 0 };
+
+        var error = Assert.Single(Validate(project));
+        Assert.Equal("Geçerli bir kategori seçin.", error.ErrorMessage);
+    }
+
+    [Fact]
     public void Gecerli_proje_hatasiz()
     {
         var project = new ProjectModel { ProjectName = "Nilüfer daire", CustomerId = 2 };

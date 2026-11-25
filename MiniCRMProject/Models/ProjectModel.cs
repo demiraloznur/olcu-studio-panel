@@ -13,8 +13,10 @@ namespace MiniCRMProject.Models
         [StringLength(2000, ErrorMessage = "Açıklama en fazla 2000 karakter olabilir.")]
         public string? Description { get; set; }
 
+        [EnumDataType(typeof(ProjectStage), ErrorMessage = "Geçerli bir aşama seçin.")]
         public ProjectStage Stage { get; set; } = ProjectStage.OlcuAlindi;
 
+        [EnumDataType(typeof(ProjectCategory), ErrorMessage = "Geçerli bir kategori seçin.")]
         public ProjectCategory Category { get; set; } = ProjectCategory.Konut;
 
         [StringLength(50, ErrorMessage = "İlçe en fazla 50 karakter olabilir.")]
