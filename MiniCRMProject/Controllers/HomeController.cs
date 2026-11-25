@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+ï»¿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using MiniCRMProject.Models;
 
@@ -127,7 +127,7 @@ namespace MiniCRMProject.Controllers
             }
             catch (Exception)
             {
-                TempData["ErrorMessage"] = "Yeni proje kaydedilirken veritabaný kaynaklý bir hata oluþtu.";
+                TempData["ErrorMessage"] = "Yeni proje kaydedilirken veritabanÄ± kaynaklÄ± bir hata oluÅŸtu.";
             }
 
             return RedirectToAction("Index");
@@ -200,7 +200,7 @@ namespace MiniCRMProject.Controllers
             }
             catch (Exception)
             {
-                TempData["ErrorMessage"] = "Proje güncellenirken veritabaný kaynaklý bir hata oluþtu.";
+                TempData["ErrorMessage"] = "Proje gÃ¼ncellenirken veritabanÄ± kaynaklÄ± bir hata oluÅŸtu.";
             }
 
             return RedirectToAction("Index");
@@ -226,7 +226,7 @@ namespace MiniCRMProject.Controllers
             }
             catch (Exception)
             {
-                TempData["ErrorMessage"] = "Proje silinirken bir hata oluþtu.";
+                TempData["ErrorMessage"] = "Proje silinirken bir hata oluÅŸtu.";
             }
 
             return RedirectToAction("Index");
