@@ -25,7 +25,7 @@
 - ASP.NET Core MVC (.NET 8), C#
 - SQL Server Express, ADO.NET (`Microsoft.Data.SqlClient`) ile **elle yazılmış, parametreli SQL**
 - Oturum (session) tabanlı giriş, şifreler `PasswordHasher` ile karıştırılarak (hash) saklanır
-- xUnit ile 46 otomatik test
+- xUnit ile 48 otomatik test
 - Kütüphanesiz HTML ve CSS; yazı tipi Manrope (yerel dosya, SIL Open Font License)
 
 ## Kurulum
@@ -68,6 +68,13 @@ Okulda teslim ettiğim hâl [`okul-teslimi`](https://github.com/demiraloznur/olc
 | Yöneticinin genel bakışı yoktu | Özet ve müşteriler sayfaları | [c917381](https://github.com/demiraloznur/olcu-studio-panel/commit/c917381) |
 | Tasarım hazır bir şablona dayanıyordu | Bootstrap'i kaldırıp kendi CSS'imle ölçü studio kimliğini uyguladım; telefon uyumu | [ef156c2](https://github.com/demiraloznur/olcu-studio-panel/commit/ef156c2) |
 | Silme onayında proje adı JavaScript koduna karışıyordu; giriş ve kayıt formlarında CSRF koruması yoktu | Onay mesajını veri özelliğinden düz metin olarak okuyorum; tüm POST isteklerinde CSRF koruması zorunlu | [d204f6b](https://github.com/demiraloznur/olcu-studio-panel/commit/d204f6b) |
+| Elle değiştirilmiş bir formla geçersiz aşama ya da kategori gönderilebiliyordu | Bu değerleri sunucuda doğrulayıp Türkçe mesajla reddediyorum | [3a10720](https://github.com/demiraloznur/olcu-studio-panel/commit/3a10720) |
+| Aynı e-postayla aynı anda gelen iki kayıt sunucu hatasına yol açıyordu | Veri tabanının benzersizlik kuralından gelen hatayı yakalayıp form mesajına çeviriyorum | [dffa8c5](https://github.com/demiraloznur/olcu-studio-panel/commit/dffa8c5) |
+
+## Bilinen sınırlar
+
+- Giriş, ASP.NET'in oturum (session) mekanizmasıyla yapılıyor ve girişte oturum kimliği yenilenmiyor. Bunun doğru çözümü, girişi çerez tabanlı kimlik doğrulamaya (ASP.NET Core Identity) taşımak; okul projesinin yapısını korumak için bunu bir sonraki projeme bıraktım.
+- Panel yerelde çalışır; internette canlı bir sürümü yok. Ekran görüntüleri yukarıda.
 
 ## Proje yapısı
 
