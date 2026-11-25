@@ -30,12 +30,26 @@ namespace MiniCRMProject.Data
             int elif = AddUser("Elif", "Koç", "elif@olcustudio.test", CustomerPassword, "Customer");
             int mert = AddUser("Mert", "Aydın", "mert@olcustudio.test", CustomerPassword, "Customer");
             int selin = AddUser("Selin", "Tunç", "selin@olcustudio.test", CustomerPassword, "Customer");
-            AddUser("Can", "Özer", "can@olcustudio.test", CustomerPassword, "Customer");
+            int can = AddUser("Can", "Özer", "can@olcustudio.test", CustomerPassword, "Customer");
 
-            AddProject("Nilüfer daire", "Üç odalı dairenin yenilenmesi", "Tasarımda", elif, 45);
-            AddProject("Osmangazi kafe", "Mahalle kafesi iç mekânı", "Analiz Ediliyor", mert, 60);
-            AddProject("Görükle ofis", "Küçük yazılım ofisi", "Kodlanıyor", selin, 20);
-            AddProject("Mudanya yazlık", "Bahçe katı yenileme", "Yayında", elif, null);
+
+            // (ad, açıklama, aşama, kategori, ilçe, müşteri, kaç gün önce başladı, bitişe kaç gün var)
+            AddProject("Nilüfer daire", "Üç odalı dairenin oturma alanı ve mutfağının yenilenmesi.",
+                ProjectStage.Konsept, ProjectCategory.Konut, "Nilüfer", elif, 40, 12);
+            AddProject("Osmangazi kafe", "Mahalle kafesi için sıcak, ahşap ağırlıklı iç mekân.",
+                ProjectStage.Cizim, ProjectCategory.Ticari, "Osmangazi", mert, 65, 25);
+            AddProject("Görükle ofis", "Sekiz kişilik yazılım ofisi; toplantı odası ve sessiz çalışma alanı.",
+                ProjectStage.Uygulama, ProjectCategory.Ofis, "Görükle", selin, 120, -5);
+            AddProject("Mudanya yazlık", "Bahçe katı yazlığın deniz manzaralı salonu.",
+                ProjectStage.TeslimEdildi, ProjectCategory.Konut, "Mudanya", elif, 200, -30);
+            AddProject("Yıldırım butik", "Küçük giyim mağazası için vitrin ve raf düzeni.",
+                ProjectStage.OlcuAlindi, ProjectCategory.Ticari, "Yıldırım", can, 3, null);
+            AddProject("Nilüfer çocuk odası", "İki kardeş için büyüyebilen çocuk odası.",
+                ProjectStage.OlcuAlindi, ProjectCategory.Konut, "Nilüfer", mert, 1, null);
+            AddProject("Osmangazi muayenehane", "Diş hekimi muayenehanesi bekleme salonu.",
+                ProjectStage.Konsept, ProjectCategory.Ofis, "Osmangazi", can, 20, 75);
+            AddProject("Mudanya pansiyon", "Altı odalı pansiyonun lobi ve kahvaltı salonu.",
+                ProjectStage.TeslimEdildi, ProjectCategory.Ticari, "Mudanya", selin, 300, -90);
         }
 
         private int AddUser(string firstName, string lastName, string email, string password, string role)
@@ -50,14 +64,18 @@ namespace MiniCRMProject.Data
             });
         }
 
-        private void AddProject(string name, string description, string status, int customerId, int? daysUntilEnd)
+        private void AddProject(string name, string description, ProjectStage stage, ProjectCategory category,
+            string district, int customerId, int daysSinceStart, int? daysUntilEnd)
         {
             projects.Add(new ProjectModel
             {
                 ProjectName = name,
                 Description = description,
-                Status = status,
+                Stage = stage,
+                Category = category,
+                District = district,
                 CustomerId = customerId,
+                CreatedAt = DateTime.Today.AddDays(-daysSinceStart),
                 EndDate = daysUntilEnd.HasValue ? DateTime.Today.AddDays(daysUntilEnd.Value) : null
             });
         }

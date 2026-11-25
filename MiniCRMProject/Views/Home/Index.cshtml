@@ -145,6 +145,67 @@
             <h4 class="mb-0 fw-bold text-uppercase" style="letter-spacing: 1px;">AKTİF PROJELER</h4>
         </div>
 
+        @{ var q = (ProjectListQuery)ViewBag.Query; }
+        <form method="get" action="/Home/Index" class="glass-card p-3 mb-3 d-flex flex-wrap gap-2 align-items-end" role="search">
+            <div class="flex-grow-1">
+                <label class="form-label small" for="Search">Ara</label>
+                <input type="search" name="Search" id="Search" value="@q.Search" class="form-control" placeholder="Proje, müşteri ya da ilçe" />
+            </div>
+            <div>
+                <label class="form-label small" for="fCategory">Kategori</label>
+                <select name="Category" id="fCategory" class="form-select">
+                    <option value="">Tümü</option>
+                    @foreach (var c in Enum.GetValues<ProjectCategory>())
+                    {
+                        <option value="@((byte)c)" selected="@(q.Category == c ? "selected" : null)">@c.DisplayName()</option>
+                    }
+                </select>
+            </div>
+            <div>
+                <label class="form-label small" for="fStage">Aşama</label>
+                <select name="Stage" id="fStage" class="form-select">
+                    <option value="">Tümü</option>
+                    @foreach (var st in Enum.GetValues<ProjectStage>())
+                    {
+                        <option value="@((byte)st)" selected="@(q.Stage == st ? "selected" : null)">@st.DisplayName()</option>
+                    }
+                </select>
+            </div>
+            <div>
+                <label class="form-label small" for="fSort">Sırala</label>
+                <select name="Sort" id="fSort" class="form-select">
+                    <option value="yeni" selected="@(q.Sort == "yeni" ? "selected" : null)">Yeniden eskiye</option>
+                    <option value="eski" selected="@(q.Sort == "eski" ? "selected" : null)">Eskiden yeniye</option>
+                    <option value="bitis" selected="@(q.Sort == "bitis" ? "selected" : null)">Bitiş tarihine göre</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-neon">Uygula</button>
+            @if (q.HasFilter)
+            {
+                <a href="/Home/Index" class="btn btn-delete">Temizle</a>
+            }
+        </form>
+
+        @if (Model.Count == 0)
+        {
+            <div class="glass-card p-4 text-center">
+                @if (q.HasFilter)
+                {
+                    <text>Aramanıza uygun proje bulunamadı.</text>
+                }
+                else if (role == "Customer")
+                {
+                    <text>Henüz size atanmış bir proje yok. Stüdyo projenizi oluşturduğunda burada görünecek.</text>
+                }
+                else
+                {
+                    <text>Henüz proje yok.</text>
+                }
+            </div>
+        }
+
+        else
+        {
         <div class="glass-card shadow-lg p-3">
             <div class="table-responsive">
                 <table class="table align-middle">
@@ -152,7 +213,7 @@
                         <tr>
                             <th class="ps-3" style="width: 35%">PROJE VE DETAY</th>
                             <th>MÜŞTERİ</th>
-                            <th class="text-center">DURUM</th>
+                            <th class="text-center">AŞAMA</th>
                             <th class="text-center">TARİHLER</th>
                             <th class="text-end pe-4">İŞLEMLER</th>
                         </tr>
@@ -171,7 +232,8 @@
                                     </span>
                                 </td>
                                 <td class="text-center">
-                                    <span class="status-badge">@item.Status</span>
+                                    <span class="status-badge">@item.Stage.DisplayName()</span>
+                                    <div class="small opacity-75 mt-1">@item.Category.DisplayName()@(string.IsNullOrEmpty(item.District) ? "" : " · " + item.District)</div>
                                 </td>
                                 <td class="text-center small">
                                     <div class="mb-1"><span class="opacity-50 me-1">Başlama:</span> <span class="fw-bold">@item.CreatedAt.ToString("dd.MM.yyyy")</span></div>
@@ -199,6 +261,7 @@
                 </table>
             </div>
         </div>
+        }
     </div>
 
 </body>

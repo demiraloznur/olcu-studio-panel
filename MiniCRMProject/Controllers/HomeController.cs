@@ -17,10 +17,14 @@ namespace MiniCRMProject.Controllers
         }
 
         [RequireLogin]
-        public IActionResult Index()
+        public IActionResult Index(ProjectListQuery query)
         {
             SessionUser user = SessionUser.From(HttpContext.Session)!;
-            List<ProjectModel> list = projects.List(user.IsAdmin ? null : user.Id);
+            // Müşteri yalnızca kendi projelerini görür; bu değer formdan değil oturumdan gelir.
+            query.CustomerId = user.IsAdmin ? null : user.Id;
+            List<ProjectModel> list = projects.List(query);
+
+            ViewBag.Query = query;
 
             ViewBag.UserFullName = user.FullName;
             ViewBag.UserRole = user.Role;

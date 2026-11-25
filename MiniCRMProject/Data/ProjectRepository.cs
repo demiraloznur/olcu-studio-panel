@@ -12,18 +12,17 @@ namespace MiniCRMProject.Data
             this.db = db;
         }
 
-        // customerId verilirse yalnızca o müşterinin projeleri döner.
-        public List<ProjectModel> List(int? customerId)
+        public List<ProjectModel> List(ProjectListQuery query)
         {
             List<ProjectModel> projects = new List<ProjectModel>();
             using SqlConnection connection = db.Create();
+            var (whereAndOrder, parameters) = query.BuildWhereAndOrder();
             string sql = @"SELECT Projects.*, Users.FirstName + ' ' + Users.LastName AS CustomerFullName
                            FROM Projects
-                           JOIN Users ON Projects.CustomerId = Users.UserId";
-            if (customerId.HasValue) sql += " WHERE Projects.CustomerId = @uid";
+                           JOIN Users ON Projects.CustomerId = Users.UserId" + whereAndOrder;
 
             SqlCommand command = new SqlCommand(sql, connection);
-            if (customerId.HasValue) command.Parameters.AddWithValue("@uid", customerId.Value);
+            command.Parameters.AddRange(parameters.ToArray());
 
             connection.Open();
             using SqlDataReader reader = command.ExecuteReader();
@@ -51,14 +50,16 @@ namespace MiniCRMProject.Data
         public void Add(ProjectModel project)
         {
             using SqlConnection connection = db.Create();
-            string sql = @"INSERT INTO Projects (ProjectName, Description, Status, CustomerId, CreatedAt, EndDate)
-                           VALUES (@pName, @pDesc, @pStatus, @pCust, @pDate, @pEndDate)";
+            string sql = @"INSERT INTO Projects (ProjectName, Description, Stage, Category, District, CustomerId, CreatedAt, EndDate)
+                           VALUES (@pName, @pDesc, @pStage, @pCategory, @pDistrict, @pCust, @pDate, @pEndDate)";
             SqlCommand command = new SqlCommand(sql, connection);
             command.Parameters.AddWithValue("@pName", project.ProjectName);
             command.Parameters.AddWithValue("@pDesc", project.Description ?? "");
-            command.Parameters.AddWithValue("@pStatus", project.Status);
+            command.Parameters.AddWithValue("@pStage", (byte)project.Stage);
+            command.Parameters.AddWithValue("@pCategory", (byte)project.Category);
+            command.Parameters.AddWithValue("@pDistrict", string.IsNullOrWhiteSpace(project.District) ? DBNull.Value : project.District.Trim());
             command.Parameters.AddWithValue("@pCust", project.CustomerId);
-            command.Parameters.AddWithValue("@pDate", DateTime.Now);
+            command.Parameters.AddWithValue("@pDate", project.CreatedAt == default ? DateTime.Now : project.CreatedAt);
             command.Parameters.AddWithValue("@pEndDate", project.EndDate.HasValue ? project.EndDate.Value : DBNull.Value);
 
             connection.Open();
@@ -70,13 +71,17 @@ namespace MiniCRMProject.Data
             using SqlConnection connection = db.Create();
             string sql = @"UPDATE Projects SET ProjectName = @name,
                            Description = @description,
-                           Status = @status,
+                           Stage = @stage,
+                           Category = @category,
+                           District = @district,
                            EndDate = @endDate
                            WHERE ProjectId = @id";
             SqlCommand command = new SqlCommand(sql, connection);
             command.Parameters.AddWithValue("@name", project.ProjectName);
             command.Parameters.AddWithValue("@description", project.Description ?? "");
-            command.Parameters.AddWithValue("@status", project.Status);
+            command.Parameters.AddWithValue("@stage", (byte)project.Stage);
+            command.Parameters.AddWithValue("@category", (byte)project.Category);
+            command.Parameters.AddWithValue("@district", string.IsNullOrWhiteSpace(project.District) ? DBNull.Value : project.District.Trim());
             command.Parameters.AddWithValue("@id", project.ProjectId);
             command.Parameters.AddWithValue("@endDate", project.EndDate.HasValue ? project.EndDate.Value : DBNull.Value);
 
@@ -102,7 +107,9 @@ namespace MiniCRMProject.Data
                 ProjectId = Convert.ToInt32(reader["ProjectId"]),
                 ProjectName = reader["ProjectName"].ToString()!,
                 Description = reader["Description"].ToString()!,
-                Status = reader["Status"].ToString()!,
+                Stage = (ProjectStage)Convert.ToByte(reader["Stage"]),
+                Category = (ProjectCategory)Convert.ToByte(reader["Category"]),
+                District = reader["District"] == DBNull.Value ? null : reader["District"].ToString(),
                 CustomerId = Convert.ToInt32(reader["CustomerId"]),
                 CreatedAt = Convert.ToDateTime(reader["CreatedAt"])
             };

@@ -103,22 +103,12 @@
                 <textarea name="Description" class="form-control" rows="2" maxlength="2000" placeholder="Proje detaylarını yazın...">@Model?.Description</textarea>
             </div>
 
+            <partial name="_ProjectStudioFields" model="Model" />
+
             <div class="row mb-4">
                 <div class="col-md-6">
-                    <label class="form-label text-uppercase">GÜNCEL DURUM</label>
-                    <select name="Status" class="form-select">
-                        <option value="Analiz Ediliyor">Analiz Ediliyor</option>
-                        <option value="Dokümantasyon">Dokümantasyon</option>
-                        <option value="Tasarımda">Tasarımda</option>
-                        <option value="Kodlanıyor">Kodlanıyor</option>
-                        <option value="Test Aşamasında">Test Aşamasında</option>
-                        <option value="Müşteri Onayında">Müşteri Onayında</option>
-                        <option value="Yayında">Yayında (Tamamlandı)</option>
-                    </select>
-                </div>
-                <div class="col-md-6">
                     <label class="form-label text-uppercase">BİTİŞ TARİHİ</label>
-                    <input type="date" name="EndDate" class="form-control" />
+                    <input type="date" name="EndDate" class="form-control" value="@(Model?.EndDate?.ToString("yyyy-MM-dd"))" />
                 </div>
             </div>
 

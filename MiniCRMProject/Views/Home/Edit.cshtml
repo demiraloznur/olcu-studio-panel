@@ -105,19 +105,9 @@
                     <label class="form-label text-uppercase">PROJE ADI</label>
                     <input type="text" name="ProjectName" class="form-control" value="@Model.ProjectName" required maxlength="150" />
                 </div>
-                <div class="col-md-6">
-                    <label class="form-label text-uppercase">GÜNCEL DURUM</label>
-                    <select name="Status" class="form-select">
-                        <option value="Analiz Ediliyor" selected="@(Model.Status == "Analiz Ediliyor" ? "selected" : null)">Analiz Ediliyor</option>
-                        <option value="Dokümantasyon" selected="@(Model.Status == "Dokümantasyon" ? "selected" : null)">Dokümantasyon</option>
-                        <option value="Tasarımda" selected="@(Model.Status == "Tasarımda" ? "selected" : null)">Tasarımda</option>
-                        <option value="Kodlanıyor" selected="@(Model.Status == "Kodlanıyor" ? "selected" : null)">Kodlanıyor</option>
-                        <option value="Test Aşamasında" selected="@(Model.Status == "Test Aşamasında" ? "selected" : null)">Test Aşamasında</option>
-                        <option value="Müşteri Onayında" selected="@(Model.Status == "Müşteri Onayında" ? "selected" : null)">Müşteri Onayında</option>
-                        <option value="Yayında" selected="@(Model.Status == "Yayında" ? "selected" : null)">Yayında (Tamamlandı)</option>
-                    </select>
-                </div>
             </div>
+
+            <partial name="_ProjectStudioFields" model="Model" />
 
             <div class="mb-3">
                 <label class="form-label text-uppercase">AÇIKLAMA</label>
