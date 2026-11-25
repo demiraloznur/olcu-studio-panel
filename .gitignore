@@ -1,0 +1,9 @@
+bin/
+obj/
+.vs/
+*.user
+.claude/
+.superpowers/
+*.bak
+*.mp4
+*.docx
