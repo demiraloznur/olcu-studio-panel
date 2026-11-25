@@ -2,6 +2,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews(options =>
 {
+    // Tüm POST isteklerinde sahte istek (CSRF) korumasını zorunlu kıl; giriş ve kayıt formları dahil.
+    options.Filters.Add(new Microsoft.AspNetCore.Mvc.AutoValidateAntiforgeryTokenAttribute());
+
     // Model bağlama hatalarının Türkçe mesajları (ör. müşteri seçilmeden gönderilen form).
     var messages = options.ModelBindingMessageProvider;
     messages.SetAttemptedValueIsInvalidAccessor((value, field) => $"{field} için geçerli bir değer girin.");

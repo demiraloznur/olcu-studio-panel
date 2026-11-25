@@ -1,3 +1,12 @@
+// Silme gibi geri alınamayan işlemlerden önce onay iste.
+// Mesaj data-onay özelliğinden metin olarak okunur; kod olarak çalıştırılmaz.
+document.addEventListener('submit', function (event) {
+    const message = event.target.getAttribute && event.target.getAttribute('data-onay');
+    if (message && !window.confirm(message)) {
+        event.preventDefault();
+    }
+});
+
 // Dar ekranda sol menüyü aç/kapat.
 (function () {
     const button = document.querySelector('.menu-dugme');

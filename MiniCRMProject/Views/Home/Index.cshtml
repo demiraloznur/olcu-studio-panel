@@ -129,7 +129,7 @@
                                         <a class="ikon-dugme" href="/Home/Edit/@item.ProjectId" title="Düzenle" aria-label="@item.ProjectName projesini düzenle">
                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z" /></svg>
                                         </a>
-                                        <form asp-action="Delete" asp-route-id="@item.ProjectId" method="post" onsubmit="return confirm('@item.ProjectName projesi ve notları silinsin mi?');">
+                                        <form asp-action="Delete" asp-route-id="@item.ProjectId" method="post" data-onay="@item.ProjectName projesi ve notları silinsin mi?">
                                             <button type="submit" class="ikon-dugme tehlike" title="Sil" aria-label="@item.ProjectName projesini sil">
                                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" /></svg>
                                             </button>
