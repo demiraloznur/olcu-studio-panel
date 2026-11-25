@@ -68,6 +68,37 @@ namespace MiniCRMProject.Data
             return (int)command.ExecuteScalar();
         }
 
+        // Her müşteri ve proje sayıları; projesi olmayan müşteri 0 ile görünür.
+        public List<CustomerSummary> GetCustomerSummaries()
+        {
+            List<CustomerSummary> list = new List<CustomerSummary>();
+            using SqlConnection connection = db.Create();
+            string sql = @"SELECT Users.UserId, Users.FirstName + ' ' + Users.LastName AS FullName, Users.Email,
+                                  COUNT(Projects.ProjectId) AS ProjectCount,
+                                  SUM(CASE WHEN Projects.ProjectId IS NOT NULL AND Projects.Stage <> 5 THEN 1 ELSE 0 END) AS ActiveProjectCount
+                           FROM Users
+                           LEFT JOIN Projects ON Projects.CustomerId = Users.UserId
+                           WHERE Users.Role = 'Customer'
+                           GROUP BY Users.UserId, Users.FirstName, Users.LastName, Users.Email
+                           ORDER BY Users.FirstName, Users.LastName";
+            SqlCommand command = new SqlCommand(sql, connection);
+
+            connection.Open();
+            using SqlDataReader reader = command.ExecuteReader();
+            while (reader.Read())
+            {
+                list.Add(new CustomerSummary
+                {
+                    UserId = Convert.ToInt32(reader["UserId"]),
+                    FullName = reader["FullName"].ToString()!,
+                    Email = reader["Email"].ToString()!,
+                    ProjectCount = Convert.ToInt32(reader["ProjectCount"]),
+                    ActiveProjectCount = Convert.ToInt32(reader["ActiveProjectCount"])
+                });
+            }
+            return list;
+        }
+
         public List<UserModel> GetCustomers()
         {
             List<UserModel> customers = new List<UserModel>();

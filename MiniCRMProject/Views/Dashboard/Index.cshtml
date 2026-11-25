@@ -1,0 +1,57 @@
+@model DashboardSummary
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Özet · ölçü studio</title>
+</head>
+<body>
+    <main>
+        <a href="/Home/Index">← Projeler</a>
+        <h1>Özet</h1>
+        <p>Toplam proje: <strong>@Model.Total</strong></p>
+
+        <h2>Aşamalara göre</h2>
+        <ul>
+            @foreach (var pair in Model.ByStage)
+            {
+                <li>@pair.Key.DisplayName(): @pair.Value</li>
+            }
+        </ul>
+
+        <h2>Önümüzdeki @DashboardSummary.UpcomingDays günde bitecekler</h2>
+        @if (Model.Upcoming.Count == 0)
+        {
+            <p>Önümüzdeki @DashboardSummary.UpcomingDays günde bitecek proje yok.</p>
+        }
+        else
+        {
+            <ul>
+                @foreach (var p in Model.Upcoming)
+                {
+                    <li><a href="/Home/Details/@p.ProjectId">@p.ProjectName</a> · @p.EndDate!.Value.ToString("dd.MM.yyyy") · @p.Stage.DisplayName()</li>
+                }
+            </ul>
+        }
+
+        <h2>Tarihi geçenler</h2>
+        @if (Model.Overdue.Count == 0)
+        {
+            <p>Tarihi geçmiş proje yok.</p>
+        }
+        else
+        {
+            <ul>
+                @foreach (var p in Model.Overdue)
+                {
+                    <li><a href="/Home/Details/@p.ProjectId">@p.ProjectName</a> · @p.EndDate!.Value.ToString("dd.MM.yyyy") · @p.Stage.DisplayName()</li>
+                }
+            </ul>
+        }
+    </main>
+</body>
+</html>
