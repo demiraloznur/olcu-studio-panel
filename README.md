@@ -67,6 +67,7 @@ Okulda teslim ettiğim hâl [`okul-teslimi`](https://github.com/demiraloznur/olc
 | Müşteri yalnızca bir tablo görüyordu | Aşama çubuklu proje detay sayfası ve ilerleme notları | [7546176](https://github.com/demiraloznur/olcu-studio-panel/commit/7546176) |
 | Yöneticinin genel bakışı yoktu | Özet ve müşteriler sayfaları | [c917381](https://github.com/demiraloznur/olcu-studio-panel/commit/c917381) |
 | Tasarım hazır bir şablona dayanıyordu | Bootstrap'i kaldırıp kendi CSS'imle ölçü studio kimliğini uyguladım; telefon uyumu | [ef156c2](https://github.com/demiraloznur/olcu-studio-panel/commit/ef156c2) |
+| Silme onayında proje adı JavaScript koduna karışıyordu; giriş ve kayıt formlarında CSRF koruması yoktu | Onay mesajını veri özelliğinden düz metin olarak okuyorum; tüm POST isteklerinde CSRF koruması zorunlu | [d204f6b](https://github.com/demiraloznur/olcu-studio-panel/commit/d204f6b) |
 
 ## Proje yapısı
 
