@@ -68,8 +68,9 @@ h2 { font-size: 1.1rem; font-weight: 700; }
 .gizli { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
 /* ---------- Marka ---------- */
-.marka { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.03em; text-decoration: none; color: inherit; }
-.marka span { font-weight: 300; }
+.marka { display: inline-flex; align-items: center; gap: .45em; font-size: 1.25rem; font-weight: 700; letter-spacing: -0.03em; text-decoration: none; color: inherit; }
+.marka .isaret { width: 1.45em; height: 1.45em; flex: none; }
+.marka .yazi > span { font-weight: 300; }
 
 /* ---------- Panel düzeni ---------- */
 .duzen { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
